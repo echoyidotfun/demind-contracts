@@ -17,6 +17,8 @@ contract AggregationRouter is IAggregationRouter, Ownable {
     address public constant NATIVE = address(0);
     string public constant NAME = "AggregationRouter";
     uint256 public constant FEE_DENOMINATOR = 1e4;
+    uint256 internal constant UINT_MAX = type(uint256).max;
+
     uint256 public MIN_FEE = 0;
     address public FEE_CLIAIMER;
 
@@ -37,7 +39,7 @@ contract AggregationRouter is IAggregationRouter, Ownable {
     }
 
     function setAllowanceForWrapping(address _wrappedNative) public onlyOwner {
-        IERC20(_wrappedNative).safeApprove(_wrappedNative, type(uint256).max);
+        IERC20(_wrappedNative).safeApprove(_wrappedNative, UINT_MAX);
     }
 
     function setTrustedTokens(address[] memory _trustedTokens) public override onlyOwner {
