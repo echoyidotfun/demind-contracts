@@ -2,9 +2,9 @@
 pragma solidity ^0.8.20;
 
 import "./UniswapV3ExecutorBase.sol";
-import "../interfaces/executors/uniswapv3/IUniswapV3SwapCallback.sol";
+import "../interfaces/executors/pancakeswap/IPancakeV3SwapCallback.sol";
 
-contract UniswapV3Executor is UniswapV3ExecutorBase, IUniswapV3SwapCallback {
+contract PancakeV3Executor is UniswapV3ExecutorBase, IPancakeV3SwapCallback {
     constructor(
         string memory _name,
         uint256 _swapGasEstimate,
@@ -14,7 +14,7 @@ contract UniswapV3Executor is UniswapV3ExecutorBase, IUniswapV3SwapCallback {
         uint24[] memory _defaultFees
     ) UniswapV3ExecutorBase(_name, _swapGasEstimate, _quoteGasLimit, _quoter, _factory, _defaultFees) {}
 
-    function uniswapV3SwapCallback(int256 amount0Delta, int256 amount1Delta, bytes calldata /*data*/ ) external {
+    function pancakeV3SwapCallback(int256 amount0Delta, int256 amount1Delta, bytes calldata) external {
         if (amount0Delta > 0) {
             IERC20(IUniswapV3Pool(msg.sender).token0()).transfer(msg.sender, uint256(amount0Delta));
         } else {

@@ -40,6 +40,7 @@ interface IAggregationRouter {
     error InsufficientAmountOut();
     error InsufficientFees();
     error FromWrappedNative();
+    error ToWrappedNative();
 
     event UpdatedTruestedTokens(address[] _newTruestedTokens);
     event UpdatedExecutors(address[] _newExecutors);
@@ -109,7 +110,9 @@ interface IAggregationRouter {
     // swap
     function swapNoSplit(TradeSummary calldata _trade, address _to, uint256 _fee) external;
 
-    function swapNoSplitFromETH(TradeSummary calldata _trade, address _to, uint256 _fee) external payable;
+    function swapNoSplitFromNative(TradeSummary calldata _trade, address _to, uint256 _fee) external payable;
+
+    function swapNoSplitToNative(TradeSummary calldata _trade, address _to, uint256 _fee) external;
 
     function swapNoSplitWithPermit(
         TradeSummary calldata _trade,

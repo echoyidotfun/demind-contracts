@@ -4,10 +4,10 @@ pragma solidity ^0.8.20;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {RouteUtils} from "../lib/RouteUtils.sol";
 import {SafeERC20} from "../lib/SafeERC20.sol";
-import {IExecutor} from "../interfaces/IExecutor.sol";
+import {IExecutor} from "../interfaces/executors/IExecutor.sol";
 import {IERC20} from "../interfaces/IERC20.sol";
 import "../interfaces/IAggregationRouter.sol";
-import {INative} from "../interfaces/INative.sol";
+import {IWrappedNative} from "../interfaces/IWrappedNative.sol";
 
 contract AggregationRouter is IAggregationRouter, Ownable {
     using SafeERC20 for IERC20;
@@ -79,21 +79,11 @@ contract AggregationRouter is IAggregationRouter, Ownable {
     }
 
     function _wrap(uint256 _amount) internal {
-        INative(WNATIVE).deposit{value: _amount}();
+        IWrappedNative(WNATIVE).deposit{value: _amount}();
     }
 
     function _unwrap(uint256 _amount) internal {
-        INative(WNATIVE).withdraw(_amount);
-    }
-
-    function _returnTokensTo(address _token, uint256 _amount, address _to) internal {
-        if (address(this) != _to) {
-            if (_token == NATIVE) {
-                payable(_to).transfer(_amount);
-            } else {
-                IERC20(_token).safeTransfer(_to, _amount);
-            }
-        }
+        IWrappedNative(WNATIVE).withdraw(_amount);
     }
 
     function _transferFrom(address _token, address _from, address _to, uint256 _amount) internal {
@@ -254,6 +244,7 @@ contract AggregationRouter is IAggregationRouter, Ownable {
             amounts[0] = _trade.amountIn;
         }
 
+        /// @dev make sure the initial amount already been sent to the first executor
         _transferFrom(_trade.path[0], _from, _trade.executors[0], amounts[0]);
         for (uint256 i; i < _trade.executors.length; i++) {
             amounts[i + 1] = IExecutor(_trade.executors[i]).query(amounts[i], _trade.path[i], _trade.path[i + 1]);
@@ -277,10 +268,29 @@ contract AggregationRouter is IAggregationRouter, Ownable {
         _swapNoSplit(_trade, msg.sender, _to, fee);
     }
 
-    function swapNoSplitFromETH(TradeSummary calldata _trade, address _to, uint256 _fee) external payable override {
+    function swapNoSplitFromNative(TradeSummary calldata _trade, address _to, uint256 _fee) external payable override {
         require(_trade.path[0] == WNATIVE, FromWrappedNative());
         _wrap(_trade.amountIn);
         _swapNoSplit(_trade, address(this), _to, _fee);
+    }
+
+    function swapNoSplitToNative(TradeSummary calldata _trade, address _to, uint256 _fee) public override {
+        require(_trade.path[_trade.path.length - 1] == WNATIVE, ToWrappedNative());
+        uint256 amountOut = _swapNoSplit(_trade, msg.sender, address(this), _fee);
+        _unwrap(amountOut);
+        _returnTokensTo(NATIVE, amountOut, _to);
+    }
+
+    /// @notice return tokens to user
+    /// @dev pass address(0) for native token
+    function _returnTokensTo(address _token, uint256 _amount, address _to) internal {
+        if (address(this) != _to) {
+            if (_token == NATIVE) {
+                payable(_to).transfer(_amount);
+            } else {
+                IERC20(_token).safeTransfer(_to, _amount);
+            }
+        }
     }
 
     function swapNoSplitWithPermit(

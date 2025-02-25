@@ -4,12 +4,12 @@ pragma solidity ^0.8.20;
 import "../lib/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IERC20.sol";
+import "../interfaces/executors/IExecutor.sol";
 
-abstract contract ExecutorBase is Ownable {
+abstract contract ExecutorBase is IExecutor, Ownable {
     using SafeERC20 for IERC20;
 
-    error NotingToRecover();
-    error InsufficientAmountOut();
+    error NothingToRecover();
 
     event UpdatedGasEstimate(address indexed _executor, uint256 _gasEstimate);
     event ExecutedSwap(address indexed _tokenIn, address indexed _tokenOut, uint256 _amountIn, uint256 _amountOut);
@@ -37,12 +37,13 @@ abstract contract ExecutorBase is Ownable {
     }
 
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
-        require(_amount > 0, NotingToRecover());
+        require(_amount > 0, NothingToRecover());
         IERC20(_token).safeTransfer(msg.sender, _amount);
         emit Recovered(_token, _amount);
     }
 
     function query(uint256 _amountIn, address _tokenIn, address _tokenOut) external view returns (uint256 amountOut) {
+        require(_tokenIn != _tokenOut, InvalidTokenPair(_tokenIn, _tokenOut));
         return _query(_amountIn, _tokenIn, _tokenOut);
     }
 
@@ -63,11 +64,11 @@ abstract contract ExecutorBase is Ownable {
         }
     }
 
+    function _query(uint256 _amountIn, address _tokenIn, address _tokenOut) internal view virtual returns (uint256);
+
     function _swap(uint256 _amountIn, uint256 _amountOut, address _tokenIn, address _tokenOut, address _to)
         internal
         virtual;
-
-    function _query(uint256 _amountIn, address _tokenIn, address _tokenOut) internal view virtual returns (uint256);
 
     // fallback
     receive() external payable {}

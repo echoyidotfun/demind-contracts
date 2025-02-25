@@ -3,12 +3,11 @@ pragma solidity ^0.8.20;
 
 import "../lib/SafeERC20.sol";
 import "../interfaces/IERC20.sol";
-import "../interfaces/executors/IUniswapV3Quoter.sol";
-import "../interfaces/executors/IUniswapV3Pool.sol";
-import "../interfaces/executors/IUniswapV3SwapCallback.sol";
+import "../interfaces/executors/uniswapv3/IUniswapV3Quoter.sol";
+import "../interfaces/executors/uniswapv3/IUniswapV3Pool.sol";
 import "./ExecutorBase.sol";
 
-abstract contract UniswapV3LikeExecutor is ExecutorBase, IUniswapV3SwapCallback {
+abstract contract UniswapV3LikeExecutor is ExecutorBase {
     using SafeERC20 for IERC20;
 
     uint160 internal constant MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342;

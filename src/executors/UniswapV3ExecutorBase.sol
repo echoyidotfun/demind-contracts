@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import "../interfaces/executors/IUniswapV3Factory.sol";
+import "../interfaces/executors/uniswapv3/IUniswapV3Factory.sol";
 import "./UniswapV3LikeExecutor.sol";
 
 abstract contract UniswapV3ExecutorBase is UniswapV3LikeExecutor {

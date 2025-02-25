@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 import "../interfaces/IERC20.sol";
 import "../lib/SafeERC20.sol";
-import "../interfaces/executors/IUniswapFactory.sol";
-import "../interfaces/executors/IUniswapPair.sol";
+import "../interfaces/executors/uniswapv2/IUniswapFactory.sol";
+import "../interfaces/executors/uniswapv2/IUniswapPair.sol";
 import "./ExecutorBase.sol";
 
 contract UniswapV2Executor is ExecutorBase {
