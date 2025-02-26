@@ -9,7 +9,7 @@ import {IERC20} from "../interfaces/IERC20.sol";
 import "../interfaces/IAggregationRouter.sol";
 import {IWrappedNative} from "../interfaces/IWrappedNative.sol";
 
-contract AggregationRouter is IAggregationRouter, Ownable {
+contract DemindRouter is IAggregationRouter, Ownable {
     using SafeERC20 for IERC20;
     using RouteUtils for Route;
 

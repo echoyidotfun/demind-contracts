@@ -1,0 +1,116 @@
+{
+  "base": {
+    "router": {
+      "name": "DemindRouter",
+      "params": {
+        "trustedTokens": [
+          "0x1111111111111111111111111111111111111111",
+          "0x2222222222222222222222222222222222222222"
+        ],
+        "feeClaimer": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "wrappedNative": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    },
+    "executors": {
+      "UniswapV3Executor": {
+        "params": {
+          "name": "UniswapV3Executor",
+          "swapGasEstimate": 150000,
+          "quoteGasLimit": 123,
+          "quoter": "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "factory": "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          "defaultFees": [100, 300, 1000]
+        }
+      },
+      "AerodromeExecutor": {
+        "params": {
+          "name": "AerodromeExecutor",
+          "factory": "0x8888888888888888888888888888888888888888",
+          "swapGasEstimate": 10000
+        }
+      }
+    },
+    "deployExecutors": ["UniswapV3Executor", "AerodromeExecutor"]
+  },
+
+  "base_sepolia": {
+    "router": {
+      "name": "DemindRouter",
+      "params": {
+        "trustedTokens": [
+          "0x1111111111111111111111111111111111111111",
+          "0x2222222222222222222222222222222222222222"
+        ],
+        "feeClaimer": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "wrappedNative": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    },
+    "executors": {
+      "UniswapV3Executor": {
+        "params": {
+          "name": "UniswapV3Executor",
+          "swapGasEstimate": 150000,
+          "quoteGasLimit": 123,
+          "quoter": "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "factory": "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          "defaultFees": [100, 300, 1000]
+        }
+      },
+      "AerodromeExecutor": {
+        "params": {
+          "name": "AerodromeExecutor",
+          "factory": "0x8888888888888888888888888888888888888888",
+          "swapGasEstimate": 10000
+        }
+      },
+      "PancakeV3Executor": {
+        "params": {
+          "name": "PancakeV3Executor",
+          "swapGasEstimate": 150000,
+          "quoteGasLimit": 123,
+          "quoter": "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "factory": "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          "defaultFees": [100, 300, 1000]
+        }
+      }
+    },
+    "deployExecutors": [
+      "UniswapV3Executor",
+      "AerodromeExecutor",
+      "PancakeV3Executor"
+    ]
+  },
+  "anvil": {
+    "router": {
+      "name": "DemindRouter",
+      "params": {
+        "trustedTokens": [
+          "0x1111111111111111111111111111111111111111",
+          "0x2222222222222222222222222222222222222222"
+        ],
+        "feeClaimer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "wrappedNative": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    },
+    "executors": {
+      "UniswapV3Executor": {
+        "params": {
+          "name": "UniswapV3",
+          "swapGasEstimate": 150000,
+          "quoteGasLimit": 123,
+          "quoter": "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "factory": "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          "defaultFees": [100, 300, 1000]
+        }
+      },
+      "AerodromeExecutor": {
+        "params": {
+          "name": "Aerodrome",
+          "factory": "0x8888888888888888888888888888888888888888",
+          "swapGasEstimate": 10000
+        }
+      }
+    },
+    "deployExecutors": ["UniswapV3Executor", "AerodromeExecutor"]
+  }
+}
