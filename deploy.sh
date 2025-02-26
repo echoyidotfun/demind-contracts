@@ -14,4 +14,4 @@ export NETWORK=$NETWORK
 
 # 执行部署
 echo "Deploying to $NETWORK..."
-forge script script/DeployExecutors.s.sol --rpc-url $NETWORK
+forge script script/DeployCore.s.sol --rpc-url $NETWORK --broadcast --verify

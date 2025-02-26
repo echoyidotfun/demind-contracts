@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "../lib/SafeERC20.sol";
-import "../interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/executors/uniswapv3/IUniswapV3Quoter.sol";
 import "../interfaces/executors/uniswapv3/IUniswapV3Pool.sol";
 import "./ExecutorBase.sol";

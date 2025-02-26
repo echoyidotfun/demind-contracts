@@ -3,7 +3,7 @@
 pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title SafeERC20

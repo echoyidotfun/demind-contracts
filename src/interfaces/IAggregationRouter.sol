@@ -114,13 +114,13 @@ interface IAggregationRouter {
 
     function swapNoSplitToNative(TradeSummary calldata _trade, address _to, uint256 _fee) external;
 
-    function swapNoSplitWithPermit(
-        TradeSummary calldata _trade,
-        address _to,
-        uint256 _fee,
-        uint256 _deadline,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) external;
+    // function swapNoSplitWithPermit(
+    //     TradeSummary calldata _trade,
+    //     address _to,
+    //     uint256 _fee,
+    //     uint256 _deadline,
+    //     uint8 _v,
+    //     bytes32 _r,
+    //     bytes32 _s
+    // ) external;
 }

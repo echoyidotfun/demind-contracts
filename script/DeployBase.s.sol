@@ -9,6 +9,7 @@ abstract contract DeployBase is Script {
         bytes constructorArgs;
         string contractName;
         string contractTag;
+        string network;
     }
 
     string public basePath;
@@ -46,16 +47,19 @@ abstract contract DeployBase is Script {
         vm.stopBroadcast();
 
         // save deployment information
-        _saveDeployedAddress(params.contractTag, params.contractName, deployAddress);
+        _saveDeployedAddress(params.network, params.contractName, deployAddress);
+        console.log("Deployed %s %s at %s", params.contractTag, params.contractName, deployAddress);
     }
 
-    function _saveDeployedAddress(string memory tag, string memory contractName, address contractAddress) internal {
-        string memory jsonPath = string.concat(".", tag);
-        vm.writeJson(vm.serializeAddress(tag, contractName, contractAddress), jsonOutputPath, jsonPath);
+    function _saveDeployedAddress(string memory network, string memory contractName, address contractAddress)
+        internal
+    {
+        string memory jsonPath = string.concat(".", network);
+        vm.writeJson(vm.serializeAddress(network, contractName, contractAddress), jsonOutputPath, jsonPath);
     }
 
-    function _getDeployedAddress(string memory tag, string memory contractName) internal view returns (address) {
-        string memory addrKey = string.concat(".", tag, ".", contractName);
+    function _getDeployedAddress(string memory network, string memory contractName) internal view returns (address) {
+        string memory addrKey = string.concat(".", network, ".", contractName);
         try vm.parseJsonAddress(vm.readFile(jsonOutputPath), addrKey) returns (address deployedAddress) {
             return deployedAddress;
         } catch {

@@ -3,11 +3,12 @@ pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {RouteUtils} from "../lib/RouteUtils.sol";
-import {SafeERC20} from "../lib/SafeERC20.sol";
 import {IExecutor} from "../interfaces/executors/IExecutor.sol";
-import {IERC20} from "../interfaces/IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../interfaces/IAggregationRouter.sol";
 import {IWrappedNative} from "../interfaces/IWrappedNative.sol";
+import {MockWETH} from "test/utils/MockWETH.sol";
 
 contract DemindRouter is IAggregationRouter, Ownable {
     using SafeERC20 for IERC20;
@@ -39,7 +40,7 @@ contract DemindRouter is IAggregationRouter, Ownable {
     }
 
     function setAllowanceForWrapping(address _wrappedNative) public onlyOwner {
-        IERC20(_wrappedNative).safeApprove(_wrappedNative, UINT_MAX);
+        IERC20(_wrappedNative).safeIncreaseAllowance(address(this), UINT_MAX);
     }
 
     function setTrustedTokens(address[] memory _trustedTokens) public override onlyOwner {
@@ -291,18 +292,5 @@ contract DemindRouter is IAggregationRouter, Ownable {
                 IERC20(_token).safeTransfer(_to, _amount);
             }
         }
-    }
-
-    function swapNoSplitWithPermit(
-        TradeSummary calldata _trade,
-        address _to,
-        uint256 _fee,
-        uint256 _deadline,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) external override {
-        IERC20(_trade.path[0]).permit(msg.sender, address(this), _trade.amountIn, _deadline, _v, _r, _s);
-        swapNoSplit(_trade, _to, _fee);
     }
 }

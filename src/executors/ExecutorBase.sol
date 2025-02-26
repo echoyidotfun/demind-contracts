@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "../lib/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/executors/IExecutor.sol";
 
 abstract contract ExecutorBase is IExecutor, Ownable {
