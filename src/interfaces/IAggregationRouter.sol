@@ -15,10 +15,11 @@ struct Route {
     uint256 gasEstimate;
 }
 
-struct PathStep {
+struct PathInPlanning {
     uint256 amountIn;
     address tokenIn;
-    Route queries;
+    Route route;
+    bool processed;
 }
 
 struct FormattedRoute {
@@ -28,6 +29,11 @@ struct FormattedRoute {
     uint256 gasEstimate;
 }
 
+/// @notice Trade summary for a swap
+/// @param amountIn the amount of tokens to swap
+/// @param amountOut the minimum amount of tokens to receive
+/// @param path the path of the trade as an array of token addresses
+/// @param executors the executors on the path that execute trade operations
 struct TradeSummary {
     uint256 amountIn;
     uint256 amountOut;
@@ -41,8 +47,13 @@ interface IAggregationRouter {
     error InsufficientFees();
     error FromWrappedNative();
     error ToWrappedNative();
+    error ZeroAddress();
+    error AlreadyAdded(address);
+    error InvalidTrustedToken(address);
+    error InvalidExecutor(address);
 
-    event UpdatedTruestedTokens(address[] _newTruestedTokens);
+    event UpdatedTrustedTokens(address[] _newTruestedTokens);
+    event TrustedTokenRemoved(address _trustedToken);
     event UpdatedExecutors(address[] _newExecutors);
     event UpdateMinFee(uint256 _oldMinFee, uint256 _newMinFee);
     event UpdatedFeeClaimer(address _oldFeeClaimer, address _newFeeClaimer);
@@ -108,6 +119,9 @@ interface IAggregationRouter {
         returns (FormattedRoute memory route);
 
     // swap
+    /**
+     * @notice swap with specified executors
+     */
     function swapNoSplit(TradeSummary calldata _trade, address _to, uint256 _fee) external;
 
     function swapNoSplitFromNative(TradeSummary calldata _trade, address _to, uint256 _fee) external payable;

@@ -11,7 +11,7 @@ import "./ExecutorBase.sol";
 contract AerodromeExecutor is ExecutorBase {
     using SafeERC20 for IERC20;
 
-    address immutable i_factory;
+    address public immutable i_factory;
 
     constructor(string memory _name, address _factory, uint256 _swapGasEstimate)
         ExecutorBase(_name, _swapGasEstimate)

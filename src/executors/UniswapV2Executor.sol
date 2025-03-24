@@ -46,9 +46,9 @@ contract UniswapV2Executor is ExecutorBase {
         view
         returns (uint256 amountOut)
     {
-        uint256 amountInWithFee = _amountIn * feeCompliment;
-        uint256 numerator = amountInWithFee * _reserveOut;
-        uint256 denominator = (_reserveIn * FEE_DENOMINATOR) + amountInWithFee;
+        uint256 amountInWithFee = _amountIn * feeCompliment; // 0.1 * fee
+        uint256 numerator = amountInWithFee * _reserveOut; // 0.1 * fee * 200
+        uint256 denominator = (_reserveIn * FEE_DENOMINATOR) + amountInWithFee; // 1 * fee + 0.1 * fee
         amountOut = numerator / denominator;
     }
 

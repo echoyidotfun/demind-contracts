@@ -1,14 +1,14 @@
 {
   "base_sepolia": {
-    "AerodromeExecutor": "0x899302209BBF3B7C9906929fc195DDA3f4367eB1",
-    "DemindRouter": "0x787286fc0a76910368dC64124d6e76AE57Dfa2b1",
-    "PancakeV3Executor": "0x7B47DbbBDA8ed2c729b6438b9eEA59447602380C",
-    "UniswapV3Executor": "0xa6e90c68C72f6C04A2AAaa258AAD67a62EbfF856"
+    "DemindRouter": "0x8588bE87AA98D6461EDcca04d253edeF0F44C8BD"
   },
   "base": {},
   "anvil": {
     "DemindRouter": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
   },
-  "sonic": {},
-  "sonic_blaze": {}
+  "sonic": {
+    "DemindRouter": "0x897b8b58860fB79dC338f30603c13ffe6dc2EA90",
+    "ShadowV2Executor": "0x10D499B3FD958E21feE648c786AbAA2574200E5d"
+  },
+  "sonic_testnet": {}
 }

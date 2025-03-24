@@ -14,6 +14,10 @@ library RouteUtils {
         route.path = _tokenIn.toBytes();
     }
 
+    function routeToAddresses(Route memory _route) internal pure returns (address[] memory addresses) {
+        addresses = _route.path.toAddresses();
+    }
+
     /**
      * Makes a deep copy of Route struct
      */

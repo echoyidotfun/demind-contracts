@@ -7,7 +7,7 @@
           "0x1111111111111111111111111111111111111111",
           "0x2222222222222222222222222222222222222222"
         ],
-        "feeClaimer": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "feeClaimer": "0x10d6aE6a4c691e91D74d9e71E8af493Ecd1dd5EA",
         "wrappedNative": "0x4200000000000000000000000000000000000006"
       }
     },
@@ -112,5 +112,31 @@
       }
     },
     "deployExecutors": ["UniswapV3Executor", "AerodromeExecutor"]
+  },
+  "sonic": {
+    "router": {
+      "name": "DemindRouter",
+      "params": {
+        "trustedTokens": [
+          "0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38",
+          "0xe5da20f15420ad15de0fa650600afc998bbe3955",
+          "0x29219dd400f2bf60e5a23d13be72b486d4038894",
+          "0x3bce5cb273f0f148010bbea2470e7b5df84c7812",
+          "0x50c42deacd8fc9773493ed674b675be577f2634b"
+        ],
+        "feeClaimer": "0x10d6aE6a4c691e91D74d9e71E8af493Ecd1dd5EA",
+        "wrappedNative": "0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38"
+      }
+    },
+    "executors": {
+      "ShadowV2Executor": {
+        "params": {
+          "name": "ShadowV2",
+          "swapGasEstimate": 150000,
+          "factory": "0x2dA25E7446A70D7be65fd4c053948BEcAA6374c8"
+        }
+      }
+    },
+    "deployExecutors": ["ShadowV2Executor"]
   }
 }

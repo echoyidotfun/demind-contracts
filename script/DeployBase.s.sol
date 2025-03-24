@@ -36,9 +36,10 @@ abstract contract DeployBase is Script {
     }
 
     /// @dev deploy contract by contract bytecode and constructor args
-    function _deployContract(DeploymentParams memory params) internal returns (address deployAddress) {
+    function _deployContract(DeploymentParams memory params) internal returns (address) {
         bytes memory creationCode = abi.encodePacked(params.bytecode, params.constructorArgs);
 
+        address deployAddress;
         vm.startBroadcast();
         assembly {
             deployAddress := create(0, add(creationCode, 0x20), mload(creationCode))
@@ -49,6 +50,7 @@ abstract contract DeployBase is Script {
         // save deployment information
         _saveDeployedAddress(params.network, params.contractName, deployAddress);
         console.log("Deployed %s %s at %s", params.contractTag, params.contractName, deployAddress);
+        return deployAddress;
     }
 
     function _saveDeployedAddress(string memory network, string memory contractName, address contractAddress)

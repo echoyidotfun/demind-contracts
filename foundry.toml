@@ -11,10 +11,13 @@ fs_permissions = [{ access = "read-write", path = "./"}]
 base = "${BASE_RPC_URL}"
 base_sepolia = "${BASE_SEPOLIA_RPC_URL}"
 anvil = "http://localhost:8545"
+sonic = "${SONIC_RPC_URL}"
+sonic-testnet = "${SONIC_TESTNET_RPC_URL}"
 
 [etherscan]
 base = { key = "${BASE_SCAN_API_KEY}", url="https://api.basescan.org/api"}
 base_sepolia = { key = "${BASE_SCAN_API_KEY}", url="https://api-sepolia.basescan.org/api"}
-
+sonic = { key = "${SONIC_SCAN_API_KEY}", url="https://api.sonicscan.org/api"}
+sonic-testnet = {key="${SONIC_SCAN_API_KEY}", url="https://api-testnet.sonicscan.org/api"}
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

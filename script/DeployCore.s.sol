@@ -32,8 +32,8 @@ contract DeployCore is DeployBase {
         bytes memory bytecode = vm.getCode(string.concat(routerSrcPath, routerName, ".sol:", routerName));
 
         string memory baseKey = string.concat(".", network, ".router.params");
-
         address[] memory trustedTokens = vm.parseJsonAddressArray(jsonConfig, string.concat(baseKey, ".trustedTokens"));
+
         address feeClaimer = vm.parseJsonAddress(jsonConfig, string.concat(baseKey, ".feeClaimer"));
         address wrappedNative;
         if (keccak256(abi.encodePacked(network)) == keccak256(abi.encodePacked("anvil"))) {
@@ -76,7 +76,7 @@ contract DeployCore is DeployBase {
             network: network
         });
         // deploy
-        _deployContract(params);
+        deployedAddress = _deployContract(params);
     }
 
     function _getNetworkExecutors() internal view returns (string[] memory) {
@@ -91,6 +91,8 @@ contract DeployCore is DeployBase {
             return _getAerodromeExecutorArgs(executorName);
         } else if (keccak256(abi.encodePacked(executorName)) == keccak256(abi.encodePacked("PancakeV3Executor"))) {
             return _getPancakeV3ExecutorArgs(executorName);
+        } else if (keccak256(abi.encodePacked(executorName)) == keccak256(abi.encodePacked("ShadowV2Executor"))) {
+            return _getRamsesV2LikeExecutorArgs(executorName);
         } else {
             revert("Unknown executor type");
         }
@@ -132,6 +134,16 @@ contract DeployCore is DeployBase {
             abi.decode(vm.parseJson(jsonConfig, string.concat(baseKey, ".defaultFees")), (uint24[]));
 
         return abi.encode(name, swapGasEstimate, quoteGasLimit, quoter, factory, defaultFees);
+    }
+
+    function _getRamsesV2LikeExecutorArgs(string memory executorName) internal view returns (bytes memory) {
+        string memory baseKey = _toBaseKey(executorName);
+
+        string memory name = vm.parseJsonString(jsonConfig, string.concat(baseKey, ".name"));
+        address factory = vm.parseJsonAddress(jsonConfig, string.concat(baseKey, ".factory"));
+        uint256 swapGasEstimate = vm.parseJsonUint(jsonConfig, string.concat(baseKey, ".swapGasEstimate"));
+
+        return abi.encode(name, factory, swapGasEstimate);
     }
 
     function _toBaseKey(string memory executorName) internal view returns (string memory) {

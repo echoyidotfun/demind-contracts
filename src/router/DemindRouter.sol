@@ -10,13 +10,17 @@ import "../interfaces/IAggregationRouter.sol";
 import {IWrappedNative} from "../interfaces/IWrappedNative.sol";
 import {MockWETH} from "test/utils/MockWETH.sol";
 
+/**
+ * @title DemindRouter: core aggregation router contract
+ * @author echoyi
+ */
 contract DemindRouter is IAggregationRouter, Ownable {
     using SafeERC20 for IERC20;
     using RouteUtils for Route;
 
     address public immutable WNATIVE;
     address public constant NATIVE = address(0);
-    string public constant NAME = "AggregationRouter";
+    string public constant NAME = "DemindRouter";
     uint256 public constant FEE_DENOMINATOR = 1e4;
     uint256 internal constant UINT_MAX = type(uint256).max;
 
@@ -45,12 +49,60 @@ contract DemindRouter is IAggregationRouter, Ownable {
 
     function setTrustedTokens(address[] memory _trustedTokens) public override onlyOwner {
         _trustedTokens = _trustedTokens;
-        emit UpdatedTruestedTokens(_trustedTokens);
+        emit UpdatedTrustedTokens(_trustedTokens);
+    }
+
+    function addTrustedToken(address _trustedToken) public onlyOwner {
+        require(_trustedToken != address(0), ZeroAddress());
+        for (uint256 i = 0; i < trustedTokens.length; i++) {
+            require(trustedTokens[i] != _trustedToken, AlreadyAdded(_trustedToken));
+        }
+        trustedTokens.push(_trustedToken);
+    }
+
+    function deleteTrustedToken(address _trustedToken) public onlyOwner {
+        bool found = false;
+        for (uint256 i = 0; i < trustedTokens.length; i++) {
+            if (trustedTokens[i] == _trustedToken) {
+                // 将最后一个元素移到当前位置
+                trustedTokens[i] = trustedTokens[trustedTokens.length - 1];
+                // 删除最后一个元素
+                trustedTokens.pop();
+                found = true;
+                emit TrustedTokenRemoved(_trustedToken);
+                break;
+            }
+        }
+        require(found, InvalidTrustedToken(_trustedToken));
     }
 
     function setExecutors(address[] memory _executors) public override onlyOwner {
-        _executors = _executors;
-        emit UpdatedExecutors(_executors);
+        executors = _executors;
+        emit UpdatedExecutors(executors);
+    }
+
+    function addExecutor(address _executor) public onlyOwner {
+        require(_executor != address(0), ZeroAddress());
+        for (uint256 i = 0; i < executors.length; i++) {
+            require(executors[i] != _executor, AlreadyAdded(_executor));
+        }
+        executors.push(_executor);
+        emit UpdatedExecutors(executors);
+    }
+
+    function deleteExecutor(address _executor) public onlyOwner {
+        bool found = false;
+        for (uint256 i = 0; i < executors.length; i++) {
+            if (executors[i] == _executor) {
+                // 将最后一个元素移到当前位置
+                executors[i] = executors[executors.length - 1];
+                executors.pop();
+                found = true;
+                emit UpdatedExecutors(executors);
+                break;
+            }
+        }
+        require(found, InvalidExecutor(_executor));
     }
 
     function setFeeClaimer(address _feeClaimer) public override onlyOwner {
@@ -173,6 +225,18 @@ contract DemindRouter is IAggregationRouter, Ownable {
         }
     }
 
+    /**
+     * @notice Finds the best path for token swapping from `_tokenIn` to `_tokenOut`.
+     * @dev This function uses a depth-first search approach with a stack to explore possible paths.
+     * It considers both direct and multi-step routes, taking into account gas costs if provided.
+     * @param _amountIn The initial amount of the input token.
+     * @param _tokenIn The address of the input token.
+     * @param _tokenOut The address of the output token.
+     * @param _maxSteps The maximum number of steps allowed in the path.
+     * @param _queries The initial route queries.
+     * @param _tokenOutPriceNWei gas price of the output token in wei, used for gas cost calculations.
+     * @return The best route found for the token swap.
+     */
     function _findBestPath(
         uint256 _amountIn,
         address _tokenIn,
@@ -182,52 +246,73 @@ contract DemindRouter is IAggregationRouter, Ownable {
         uint256 _tokenOutPriceNWei
     ) internal view returns (Route memory) {
         Route memory bestOption = _queries.clone();
-        uint256 bestAmountOut;
-        uint256 gasEstimate;
-        bool withGas = _tokenOutPriceNWei != 0;
+        uint256 bestAmountOut = 0;
+        bool withGas = _tokenOutPriceNWei > 0;
 
-        PathStep[] memory stack = new PathStep[](_maxSteps);
-        uint256 stackSize = 0;
-        // initial stack
-        stack[stackSize++] = PathStep(_amountIn, _tokenIn, _queries);
-
+        PathInPlanning[] memory pathSteps = new PathInPlanning[](100);
+        uint256 stackSize = 1;
+        pathSteps[0] = PathInPlanning(_amountIn, _tokenIn, _queries, false);
         while (stackSize > 0) {
-            PathStep memory current = stack[--stackSize];
+            PathInPlanning memory current = pathSteps[stackSize - 1];
+            stackSize--;
+
+            uint256 gasEstimate = 0;
             Query memory queryDirect = queryNoSplit(current.amountIn, current.tokenIn, _tokenOut);
-            // check direct route
-            if (queryDirect.amountOut != 0) {
+            if (queryDirect.amountOut > 0) {
                 if (withGas) {
                     gasEstimate = IExecutor(queryDirect.executor).swapGasEstimate();
                 }
-                Route memory newOption = current.queries.clone();
-                newOption.addToTail(queryDirect.amountOut, queryDirect.executor, queryDirect.tokenOut, gasEstimate);
-                if (queryDirect.amountOut > bestAmountOut) {
-                    bestAmountOut = queryDirect.amountOut;
-                    bestOption = newOption;
+                Route memory newRoute = current.route.clone();
+                newRoute.addToTail(queryDirect.amountOut, queryDirect.executor, queryDirect.tokenOut, gasEstimate);
+                uint256 amountOut = queryDirect.amountOut;
+                if (bestAmountOut == 0 || bestAmountOut < amountOut) {
+                    if (withGas && bestAmountOut > 0 && newRoute.gasEstimate > bestOption.gasEstimate) {
+                        unchecked {
+                            uint256 gasCostDiff =
+                                (_tokenOutPriceNWei * (newRoute.gasEstimate - bestOption.gasEstimate)) / 1e9;
+                            uint256 amountOutDiff = (amountOut - bestAmountOut);
+                            if (gasCostDiff <= amountOutDiff) {
+                                bestOption = newRoute;
+                                bestAmountOut = amountOut;
+                            }
+                        }
+                    } else {
+                        bestAmountOut = amountOut;
+                        bestOption = newRoute;
+                    }
                 }
             }
-            // check multi steps route
-            if (_maxSteps > 1 && current.queries.executors.length / 32 >= _maxSteps - 2) {
-                // 修改此行
-                for (uint256 i = 0; i < trustedTokens.length; i++) {
-                    if (current.tokenIn == trustedTokens[i]) {
+            if (_maxSteps > 1 && current.route.executors.length / 32 <= _maxSteps - 2) {
+                address[] memory pathTokens = current.route.routeToAddresses();
+                for (uint256 i; i < trustedTokens.length; i++) {
+                    address trustedToken = trustedTokens[i];
+                    if (current.tokenIn == trustedToken || _tokenOut == trustedToken) {
                         continue;
                     }
-                    Query memory bestSwap = queryNoSplit(current.amountIn, current.tokenIn, trustedTokens[i]);
-                    if (bestSwap.amountOut == 0) {
+
+                    bool tokenInPath = false;
+                    for (uint256 j; j < pathTokens.length; j++) {
+                        if (pathTokens[j] == trustedToken) {
+                            tokenInPath = true;
+                            break;
+                        }
+                    }
+                    if (tokenInPath) {
                         continue;
                     }
-                    Route memory newRoute = current.queries.clone();
+                    Query memory bestSwap = queryNoSplit(current.amountIn, current.tokenIn, trustedToken);
+                    if (bestSwap.amountOut == 0) continue;
+
+                    Route memory newRoute = current.route.clone();
                     if (withGas) {
                         gasEstimate = IExecutor(bestSwap.executor).swapGasEstimate();
                     }
                     newRoute.addToTail(bestSwap.amountOut, bestSwap.executor, bestSwap.tokenOut, gasEstimate);
-
-                    // push new route to stack
-                    stack[stackSize++] = PathStep(bestSwap.amountOut, bestSwap.tokenOut, newRoute);
+                    pathSteps[stackSize++] = PathInPlanning(bestSwap.amountOut, trustedToken, newRoute, false);
                 }
             }
         }
+
         return bestOption;
     }
 
